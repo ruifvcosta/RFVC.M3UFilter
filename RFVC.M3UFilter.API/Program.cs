@@ -7,8 +7,9 @@ using Microsoft.Extensions.Hosting.WindowsServices;
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
     Args = args,
-    ContentRootPath = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location)
+    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location)
 });
+
 
 // Add services to the container.
 builder.Services.AddHostedService<MyHostedService>();
@@ -21,6 +22,16 @@ builder.Services.AddSwaggerGen();
 
 builder.Host.UseWindowsService();
 
+
+// Allow any ip to a specific port
+// Disabled https to use on local network without certificate
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5000); // to listen for incoming http connection on port 5001
+    //options.ListenAnyIP(5001, configure => configure.UseHttps()); // to listen for incoming https connection on port 5001
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -30,10 +41,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Disabled https redirection to use on local network without certificate
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+
