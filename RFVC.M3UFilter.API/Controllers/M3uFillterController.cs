@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace RFVC.M3UFilter.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/m3ufilter")]
     [ApiController]
     public class M3uFilterController : ControllerBase
     {
